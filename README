@@ -1,0 +1,102 @@
+bgpv4 
+if (protocol bgp) {set gw pppoe-out1;accept} if (afi ipv4 && bgp-network) { accept; }else { reject; }
+
+bgpv6
+if (protocol bgp) {set gw pppoe-out1;accept} if (afi ipv6 && bgp-network) { accept; }else { reject; }
+
+bird.conf
+
+log syslog all;
+
+router id xx.xx.xx.xx;
+
+include "asn_cn.conf";
+
+protocol device {
+        scan time 10;
+}
+
+protocol static {
+        ipv4 {};
+}
+
+protocol static {
+        ipv6 {};
+}
+
+protocol bgp slicev4
+{
+        description "BGP uplink slice full cn table";
+        local as 65537;
+        neighbor 10.0.8.8 as 65538;
+        multihop 2;
+        password "xxxxxxx";
+        source address 10.0.8.1;
+
+  ipv4 {
+                import all;
+                export none;
+  };   
+          graceful restart on;       
+}
+
+protocol bgp slicev6
+{
+        description "BGP uplink slice full cn table";
+        local as 65537;
+        neighbor fd0f:42d2:1480:3396:4099:93d6:d833:2f30 as 65538;
+        multihop 2;
+        password "xxxxx";
+        source address fd0f:42d2:1480:3396:4099:930f:42d2:1480;
+
+  ipv6 {
+                import all;
+                export none;
+  };   
+          graceful restart on;       
+}
+
+
+
+protocol bgp homev4
+{
+        description "BGP downlink home full cn table";
+        local as 528888550;
+        neighbor 10.0.8.5 as 528888552;
+        multihop 2;
+        password "xxxxxxx";
+        source address 10.0.8.1;
+
+  ipv4 {
+                import none;
+                export filter {
+                        if bgp_path ~ china_asn then accept; else reject;
+                };
+  };
+        graceful restart on;
+        #bfd on;
+}
+
+
+protocol bgp homev6
+{
+#        debug all;
+        description "BGP downlink bgp full table";
+        local as 528888550;
+        neighbor fd0f:42d2:1480:3396:4099:93e3:485b:84ce as 528888552;
+        multihop 2;
+        password "xxxxxx";
+        source address fd0f:42d2:1480:3396:4099:930f:42d2:1480;
+  ipv6 {
+                import none;
+                export filter {
+                        if bgp_path ~ china_asn then accept; else reject;
+                };
+  };
+        graceful restart on;
+        #bfd on;
+}
+
+asn_cn.conf
+define china_asn = [
+];
