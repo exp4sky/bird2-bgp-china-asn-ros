@@ -1,11 +1,14 @@
-bgpv4 
+routeros-routing-route fiters
+新建bgpv4 
+内容如下
 if (protocol bgp) {set gw pppoe-out1;accept} if (afi ipv4 && bgp-network) { accept; }else { reject; }
 
-bgpv6
+新建bgpv6 
+内容如下
 if (protocol bgp) {set gw pppoe-out1;accept} if (afi ipv6 && bgp-network) { accept; }else { reject; }
 
 bird.conf
-
+内容如下
 log syslog all;
 
 router id xx.xx.xx.xx;
